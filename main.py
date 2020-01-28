@@ -15,19 +15,29 @@ API_BASE_URL = "http://truetime.portauthority.org/bustime/api/v3/"
 # bus predictions URL
 GET_PREDICTIONS_URL = API_BASE_URL+"getpredictions?"
 
-BUS_ROUTES="75"
-BUS_STOPS="3285,19125"
+# bus statuses to show
+buses = [
+    {"name": "75 inbound",
+     "route": "75",
+     "stop": "3285"
+    },
+    {"name": "75 outbound",
+     "route": "75",
+     "stop": "19125"
+    }
+]
 
 # time between API requests, in seconds
 TIME_BETWEEN_REQUESTS = 60
 
+
 # make a getpredictions API request
-def get_predictions():
+def get_predictions(rt,stpid):
     request_url = GET_PREDICTIONS_URL
 
     request_params = {'key': API_KEY,
-                      'rt': BUS_ROUTES,
-                      'stpid': BUS_STOPS,
+                      'rt': rt,
+                      'stpid': stpid,
                       'rtpidatafeed': DATA_FEED,
                       'format': 'json'}
 
@@ -44,40 +54,34 @@ def get_predictions():
 
     return data
 
-def main():
-    while True:
 
-#        display.clear()
-        
-        api_response = get_predictions()
-
+def loop():
+    for bus in buses:
+        api_response = get_predictions(bus['route'],bus['stop'])
         print (api_response)
-
         if 'error' in api_response['bustime-response']:
             # one or more errors were received in the response
             errors = api_response['bustime-response']['error']
             for error in errors:
                 print(error['msg'])
+                
+        eta = "###"
+        if 'prd' in api_response['bustime-response']:
+            prediction = api_response['bustime-response']['prd'][0]
+            eta = prediction["prdctdn"]
+            if eta.isdigit():
+                eta += "m"
 
+        eta_text = "{:12} {:>4}".format(bus["name"],
+                                        eta)
+        print(eta_text)
 
-        if 'prd' not in api_response['bustime-response']:
-            # no route predictions
-            print("###")
-            continue
-            
-        predictions = api_response['bustime-response']['prd']
-        
-        for prediction in predictions:
-            predict_time = prediction["prdctdn"]
-            if predict_time.isdigit():
-                predict_time += "m"
-            prediction_text = "{:3} {:8} {:>4}".format(prediction["rt"],
-                                                        prediction["rtdir"],
-                                                        predict_time)
-            print(prediction_text)
-
+def main():
+    while True:
+        loop()
         print("")
         time.sleep(TIME_BETWEEN_REQUESTS)
+                
 
 
 try:
