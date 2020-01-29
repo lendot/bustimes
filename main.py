@@ -2,7 +2,7 @@ import urllib.parse
 import urllib.request
 import json
 import time
-#import display
+import display
 
 # API key to use for requests
 API_KEY = "vxQXe7TxHtVtJc4FLAns2bQxp"
@@ -31,6 +31,8 @@ buses = [
 TIME_BETWEEN_REQUESTS = 60
 
 
+disp = display.Display()
+
 # make a getpredictions API request
 def get_predictions(rt,stpid):
     request_url = GET_PREDICTIONS_URL
@@ -56,30 +58,31 @@ def get_predictions(rt,stpid):
 
 
 def loop():
+    disp.clear()
     for bus in buses:
         api_response = get_predictions(bus['route'],bus['stop'])
-        print (api_response)
+#        print (api_response)
         if 'error' in api_response['bustime-response']:
             # one or more errors were received in the response
             errors = api_response['bustime-response']['error']
             for error in errors:
-                print(error['msg'])
+                pass
+#                print(error['msg'])
                 
-        eta = "###"
+        eta = "---"
         if 'prd' in api_response['bustime-response']:
             prediction = api_response['bustime-response']['prd'][0]
             eta = prediction["prdctdn"]
             if eta.isdigit():
                 eta += "m"
 
-        eta_text = "{:12} {:>4}".format(bus["name"],
-                                        eta)
-        print(eta_text)
+        eta_text = "{:12} {:>4}".format(bus["name"],eta)
+#        print(eta_text)
+        disp.text(eta_text)
 
 def main():
     while True:
         loop()
-        print("")
         time.sleep(TIME_BETWEEN_REQUESTS)
                 
 
@@ -89,4 +92,4 @@ try:
 except KeyboardInterrupt:
     pass
 finally:
-    display.end()
+    disp.end()
