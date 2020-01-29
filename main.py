@@ -3,14 +3,13 @@ import urllib.request
 import json
 import time
 import display
-import os
+import sys
 
 # API key to use for requests
-API_KEY_ENVIRON_VAR='BUSTIME_API_KEY'
-if API_KEY_ENVIRON_VAR in os.environ:
-    API_KEY = os.environ[API_KEY_ENVIRON_VAR]
+if len(sys.argv) > 1:
+    API_KEY = sys.argv[1]
 else:
-    print("Environment variable "+API_KEY_ENVIRON_VAR+" not set.")
+    print("Usage: python3 main.py API_KEY")
     exit(1)
 
 # which of the system's data feeds to use
