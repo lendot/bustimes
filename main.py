@@ -53,9 +53,10 @@ def get_predictions(rt,stpid):
 #    print(full_request_url)
 
     with urllib.request.urlopen(full_request_url) as response:
-        json_data = response.read()
+        json_data = response.read().decode('utf-8')
 
     # convert json to native
+#    print(json_data)
     data = json.loads(json_data)
 #    print(data)
 
