@@ -65,15 +65,14 @@ def get_predictions(rt,stpid):
 
 def loop():
     disp.clear()
+    error_msgs=[]
     for bus in buses:
         api_response = get_predictions(bus['route'],bus['stop'])
 #        print (api_response)
         if 'error' in api_response['bustime-response']:
             # one or more errors were received in the response
             errors = api_response['bustime-response']['error']
-            for error in errors:
-                pass
-#                print(error['msg'])
+            error_msgs.extend(errors)
                 
         eta = "---"
         if 'prd' in api_response['bustime-response']:
@@ -86,6 +85,12 @@ def loop():
 #        print(eta_text)
         disp.text(eta_text)
 
+    if len(error_msgs) > 0:
+        print()
+        print()
+        for error in error_msgs:
+            print(error)
+        
 def main():
     while True:
         loop()
