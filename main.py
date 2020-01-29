@@ -3,9 +3,15 @@ import urllib.request
 import json
 import time
 import display
+import os
 
 # API key to use for requests
-API_KEY = "vxQXe7TxHtVtJc4FLAns2bQxp"
+API_KEY_ENVIRON_VAR='BUSTIME_API_KEY'
+if API_KEY_ENVIRON_VAR in os.environ:
+    API_KEY = os.environ[API_KEY_ENVIRON_VAR]
+else:
+    print("Environment variable "+API_KEY_ENVIRON_VAR+" not set.")
+    exit(1)
 
 # which of the system's data feeds to use
 DATA_FEED = "Port Authority Bus"
