@@ -67,8 +67,18 @@ def loop():
     disp.clear()
     error_msgs=[]
     for bus in buses:
-        api_response = get_predictions(bus['route'],bus['stop'])
-#        print (api_response)
+        try: 
+            api_response = get_predictions(bus['route'],bus['stop'])
+        except Exception as e:
+            # catch-all for anything that goes wrong with fetching the data
+            disp.text("Error")
+            print()
+            print()
+            print(e)
+            return
+
+
+        # print (api_response)
         if 'error' in api_response['bustime-response']:
             # one or more errors were received in the response
             errors = api_response['bustime-response']['error']
