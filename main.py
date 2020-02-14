@@ -1,9 +1,7 @@
-import urllib.parse
-import urllib.request
-import json
 import time
 import display
 import sys
+import bus
 
 # API key to use for requests
 if len(sys.argv) > 1:
@@ -12,14 +10,8 @@ else:
     print("Usage: python3 main.py API_KEY")
     exit(1)
 
-# which of the system's data feeds to use
-DATA_FEED = "Port Authority Bus"
-
-# base url for all API requests
-API_BASE_URL = "http://truetime.portauthority.org/bustime/api/v3/"
-# bus predictions URL
-GET_PREDICTIONS_URL = API_BASE_URL+"getpredictions?"
-
+bus_service = bus.Bus(API_KEY)
+    
 # bus statuses to show
 buses = [
     {"name": "75 inbound",
@@ -38,37 +30,13 @@ TIME_BETWEEN_REQUESTS = 60
 
 disp = display.Display()
 
-# make a getpredictions API request
-def get_predictions(rt,stpid):
-    request_url = GET_PREDICTIONS_URL
-
-    request_params = {'key': API_KEY,
-                      'rt': rt,
-                      'stpid': stpid,
-                      'rtpidatafeed': DATA_FEED,
-                      'format': 'json'}
-
-    full_request_url = request_url + urllib.parse.urlencode(request_params)
-
-#    print(full_request_url)
-
-    with urllib.request.urlopen(full_request_url) as response:
-        json_data = response.read().decode('utf-8')
-
-    # convert json to native
-#    print(json_data)
-    data = json.loads(json_data)
-#    print(data)
-
-    return data
-
 
 def loop():
     disp.clear()
     error_msgs=[]
     for bus in buses:
         try: 
-            api_response = get_predictions(bus['route'],bus['stop'])
+            api_response = bus_service.get_predictions(bus['route'],bus['stop'])
         except Exception as e:
             # catch-all for anything that goes wrong with fetching the data
             disp.text("Error")
