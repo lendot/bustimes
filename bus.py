@@ -10,12 +10,27 @@ API_BASE_URL = "http://truetime.portauthority.org/bustime/api/v3/"
 GET_PREDICTIONS_URL = API_BASE_URL+"getpredictions?"
 
 class Bus:
-
+    """
+    Interface to the BusTime bus tracking API.
+    """
+    
     def __init__(self,api_key):
+        """
+        Constructor for Bus.
+
+        Parameters:
+          api_key: The BusTime API key.
+        """
         self.api_key = api_key
 
-    # make a getpredictions API request
     def get_predictions(self,rt,stpid):
+        """
+        Get a bus arrival prediction.
+        
+        Parameters:
+          rt: the bus route
+          stpid: the stop id
+        """
         request_url = GET_PREDICTIONS_URL
 
         request_params = {'key': self.api_key,
