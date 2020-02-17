@@ -1,0 +1,26 @@
+bus:
+  # base url for API queries
+  api_base_url: http://truetime.portauthority.org/bustime/api/v3
+  # BusTime API key
+  api_key: abcdefg1234567
+  # data feed to query against
+  data_feed: Port Authority Bus
+  # time between bus API queries, in seconds
+  time_between_requests: 60
+  # bus routes to query
+  route:
+    - route: 75
+      direction: inbound
+      stop: 3285
+    - route: 75
+      direction: outbound
+      stop: 19125
+weather:
+  # Dark Sky API key
+  api_key: abcdefg1234567
+  # latitude for weather query
+  latitude: 41.29
+  # longitude for weather query
+  longitude: -77.92
+  # time between weather API queries, in seconds
+  time_between_requests: 1800
