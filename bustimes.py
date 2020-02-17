@@ -95,7 +95,14 @@ class BusTimes(tk.Frame):
         def update(self):
             print("bus update")
             for bus in self.bus_routes:
-                api_response = self.bus_service.get_predictions(bus['route'],bus['stop'])
+                try:
+                    api_response = self.bus_service.get_predictions(bus['route'],bus['stop'])
+                except Exception as e:
+                    # catch-all for anything that goes wrong with fetching the data
+                    print(e)
+                    bus['due_label']['text'] = "err"
+                    continue
+                    
                 eta = "---"
                 if 'prd' in api_response['bustime-response']:
                     # we have a prediction
@@ -188,26 +195,44 @@ class BusTimes(tk.Frame):
                     
         def update(self):
             print("weather update")
-            weather = self.weather_service.get_weather()
-            self.label_current_temp['text'] = weather['current']['temp']
-            self.label_current_summary['text'] = weather['current']['summary']
-            self.label_today_temp['text'] = weather['today']['temp']
-            self.label_today_summary['text'] = weather['today']['summary']
+            success = True
+            try:
+                weather = self.weather_service.get_weather()
+            except Exception as e:
+                # catch-all for anything that goes wrong with fetching the data
+                print(e)
+                success = False
+
+            if success:
+                self.label_current_temp['text'] = weather['current']['temp']
+                self.label_current_summary['text'] = weather['current']['summary']
+                self.label_today_temp['text'] = weather['today']['temp']
+                self.label_today_summary['text'] = weather['today']['summary']
+            else:
+                self.label_current_temp['text'] = "err"
+                self.label_current_summary['text'] = "---"
+                self.label_today_temp['text'] = "err"
+                self.label_today_summary['text'] = "---"
+                
             self.frame.after(self.config['weather']['time_between_requests']*1000,
                              self.update)
 
 
 def main():
     with open('config.yaml') as f:
-        config = yaml.load(f)
+        config = yaml.load(f,Loader=yaml.FullLoader)
     weather_api_key = config['weather']['api_key']
     lat = config['weather']['latitude']
     lng = config['weather']['longitude']
-    bus_api_key = config['bus']['api_key']
     weather_service = weather.Weather(weather_api_key,
                                       lat,
                                       lng)
-    bus_service = bus.Bus(bus_api_key)
+    bus_api_key = config['bus']['api_key']
+    bus_api_base_url = config['bus']['api_base_url']
+    bus_data_feed = config['bus']['data_feed']
+    bus_service = bus.Bus(bus_api_key,
+                          bus_api_base_url,
+                          bus_data_feed)
 
     window = tk.Tk()
     
