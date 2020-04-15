@@ -45,7 +45,6 @@ class Bus:
                           'format': 'json'}
 
         full_request_url = request_url + urllib.parse.urlencode(request_params)
-        print(full_request_url)
 
         with urllib.request.urlopen(full_request_url) as response:
             json_data = response.read().decode('utf-8')

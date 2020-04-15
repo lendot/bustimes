@@ -1,3 +1,4 @@
+import logging
 import tkinter as tk
 import tkinter.font as tkfont
 import yaml
@@ -5,6 +6,8 @@ import weather
 import bus
 
 CONFIG_FILE = "config.yaml"
+
+LOG_FILE = "bustimes.log"
 
 FONT_FAMILY = "Ubuntu Mono"
 
@@ -93,13 +96,12 @@ class BusTimes(tk.Frame):
             
 
         def update(self):
-            print("bus update")
             for bus in self.bus_routes:
                 try:
                     api_response = self.bus_service.get_predictions(bus['route'],bus['stop'])
                 except Exception as e:
                     # catch-all for anything that goes wrong with fetching the data
-                    print(e)
+                    logging.exception("Bus update error")
                     bus['due_label']['text'] = "err"
                     continue
                     
@@ -194,13 +196,12 @@ class BusTimes(tk.Frame):
             self.label_today_summary.grid(column=0,row=2)
                     
         def update(self):
-            print("weather update")
             success = True
             try:
                 weather = self.weather_service.get_weather()
             except Exception as e:
                 # catch-all for anything that goes wrong with fetching the data
-                print(e)
+                logging.exception("Weather update error")
                 success = False
 
             if success:
@@ -219,17 +220,29 @@ class BusTimes(tk.Frame):
 
 
 def main():
+
+    logging.basicConfig(filename=LOG_FILE,
+                        level=logging.INFO,
+                        format='%(asctime)s %(message)s')
+    logging.info("Bustimes starting")
+    
     with open('config.yaml') as f:
         config = yaml.load(f,Loader=yaml.FullLoader)
     weather_api_key = config['weather']['api_key']
     lat = config['weather']['latitude']
     lng = config['weather']['longitude']
+    logging.info('Weather API: %s',weather_api_key)
+    logging.info('Weather latitude: %s',lat)
+    logging.info('Weather longitude: %s',lng)
     weather_service = weather.Weather(weather_api_key,
                                       lat,
                                       lng)
     bus_api_key = config['bus']['api_key']
     bus_api_base_url = config['bus']['api_base_url']
     bus_data_feed = config['bus']['data_feed']
+    logging.info('Bus API: %s',bus_api_key)
+    logging.info("Bus API base URL: %s",bus_api_base_url)
+    logging.info("Bus API data feed: %s",bus_data_feed)
     bus_service = bus.Bus(bus_api_key,
                           bus_api_base_url,
                           bus_data_feed)
@@ -240,6 +253,12 @@ def main():
 
     window.mainloop()
 
+    logging.info("Bustimes exiting")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        logging.exception("main exception")
+    finally:
+        logging.info("Exiting")
