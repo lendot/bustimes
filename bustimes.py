@@ -2,7 +2,7 @@ import logging
 import tkinter as tk
 import tkinter.font as tkfont
 import yaml
-import weather
+import weatherapi
 import bus
 
 CONFIG_FILE = "config.yaml"
@@ -206,7 +206,8 @@ class BusTimes(tk.Frame):
 
             if success:
                 self.label_current_temp['text'] = weather['current']['temp']
-                self.label_current_summary['text'] = weather['current']['summary']
+                self.label_current_summary['text'] = "{} {}% hum.".format(
+                        weather['current']['summary'],weather['current']['humidity'])
                 self.label_today_temp['text'] = weather['today']['temp']
                 self.label_today_summary['text'] = weather['today']['summary']
             else:
@@ -234,7 +235,7 @@ def main():
     logging.info('Weather API: %s',weather_api_key)
     logging.info('Weather latitude: %s',lat)
     logging.info('Weather longitude: %s',lng)
-    weather_service = weather.Weather(weather_api_key,
+    weather_service = weatherapi.WeatherApi(weather_api_key,
                                       lat,
                                       lng)
     bus_api_key = config['bus']['api_key']
